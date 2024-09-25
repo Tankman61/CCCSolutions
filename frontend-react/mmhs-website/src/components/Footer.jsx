@@ -3,7 +3,7 @@ import logoImage from "../assets/mmhs_logo.png";
 
 const FooterWithLogo = () => {
   return (
-    <footer className="w-full bg-white p-8">
+    <footer className="w-full bg-white px-16 py-8">
       <div className="flex flex-row flex-wrap items-center justify-center gap-y-6 gap-x-12 bg-white text-center md:justify-between">
         <img src={logoImage} alt="logo-ct" className="h-[75px]" />
         <ul className="flex flex-wrap items-center gap-y-2 gap-x-8">

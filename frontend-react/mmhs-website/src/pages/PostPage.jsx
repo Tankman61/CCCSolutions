@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import PocketBase from 'pocketbase';
 
@@ -10,16 +10,11 @@ export default function PostPage() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const abortControllerRef = useRef(new AbortController());
 
   useEffect(() => {
     checkAuthStatus();
     fetchPost();
     fetchComments();
-
-    return () => {
-      abortControllerRef.current.abort();
-    };
   }, [id]);
 
   const checkAuthStatus = () => {
@@ -28,16 +23,14 @@ export default function PostPage() {
   };
 
   const fetchPost = async () => {
-    abortControllerRef.current.abort();
-    abortControllerRef.current = new AbortController();
-
     try {
       const record = await pb.collection('posts').getOne(id, {
-        expand: 'user',
-      }, { signal: abortControllerRef.current.signal });
+        expand: 'author',
+        requestKey: `post_${id}`
+      });
       setPost(record);
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      if (error.name !== 'ClientResponseError' || !error.message.includes('autocancelled')) {
         console.error("Error fetching post:", error);
       }
     }
@@ -48,11 +41,12 @@ export default function PostPage() {
       const resultList = await pb.collection('comments').getList(1, 50, {
         filter: `post="${id}"`,
         sort: '-created',
-        expand: 'user',
-      }, { signal: abortControllerRef.current.signal });
+        expand: 'author',
+        requestKey: `comments_${id}`
+      });
       setComments(resultList.items);
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      if (error.name !== 'ClientResponseError' || !error.message.includes('auto cancelled')) {
         console.error("Error fetching comments:", error);
       }
     }
@@ -63,35 +57,15 @@ export default function PostPage() {
       alert("Please log in to vote.");
       return;
     }
+
     try {
-      const userId = pb.authStore.model.id;
-      const existingVote = await pb.collection('votes').getFirstListItem(`user="${userId}" && post="${id}"`);
-      
-      if (existingVote) {
-        if (existingVote.vote === (voteType === 'upvote' ? 1 : -1)) {
-          // User is trying to vote the same way again, so remove their vote
-          await pb.collection('votes').delete(existingVote.id);
-        } else {
-          // User is changing their vote
-          await pb.collection('votes').update(existingVote.id, { vote: voteType === 'upvote' ? 1 : -1 });
-        }
-      } else {
-        // New vote
-        await pb.collection('votes').create({
-          user: userId,
-          post: id,
-          vote: voteType === 'upvote' ? 1 : -1
-        });
-      }
+      const updatedVotes = post.upvotes + (voteType === 'upvote' ? 1 : -1);
 
-      // Recalculate total votes for the post
-      const votes = await pb.collection('votes').getFullList({ filter: `post="${id}"` });
-      const totalVotes = votes.reduce((sum, vote) => sum + vote.vote, 0);
-
-      // Update the post with the new vote count
-      await pb.collection('posts').update(id, { upvotes: totalVotes });
-
-      fetchPost();
+      await pb.collection('posts').update(id, { upvotes: updatedVotes });
+      setPost((prevPost) => ({
+        ...prevPost,
+        upvotes: updatedVotes,
+      }));
     } catch (error) {
       console.error("Error voting on post:", error);
     }
@@ -105,11 +79,13 @@ export default function PostPage() {
     }
     try {
       const data = {
-        text: newComment,
+        body: newComment,
         post: id,
         author: pb.authStore.model.id,
       };
+
       await pb.collection('comments').create(data);
+
       setNewComment('');
       fetchComments();
     } catch (error) {
@@ -120,46 +96,77 @@ export default function PostPage() {
   if (!post) return <div>Loading...</div>;
 
   return (
-    <div className="container mx-auto p-4">
-      <Link to="/" className="text-blue-500 hover:underline mb-4 inline-block">← Back to Forum</Link>
-      <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
-      <div className="mb-4">
-        <p className="text-gray-600">{post.body}</p>
-        <div className="mt-2 flex items-center space-x-4">
-          <span className="text-sm text-gray-500">
-            By {post.expand?.user?.username || 'Unknown'} on {new Date(post.created).toLocaleDateString()}
+    <div className="container mx-auto p-6">
+      <Link to="/forum" className="text-blue-500 hover:underline mb-6 inline-block">← Back to Forum</Link>
+
+      <div className="bg-white shadow-md p-6 rounded-lg">
+        <h1 className="text-3xl font-bold mb-4 text-gray-800">{post.title}</h1>
+
+        <div className="text-gray-700 leading-relaxed text-lg mb-4">
+          {post.body}
+        </div>
+
+        <div className="flex items-center space-x-6 mb-6">
+          <span className="text-gray-500 text-sm">
+            By {post.expand?.author?.username || 'Unknown'} on {new Date(post.created).toLocaleDateString()}
           </span>
-          <button onClick={() => handleVote('upvote')} className="text-green-500">▲</button>
-          <span>{post.upvotes}</span>
-          <button onClick={() => handleVote('downvote')} className="text-red-500">▼</button>
+
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={() => handleVote('upvote')}
+              className="text-green-500 hover:text-green-600"
+            >
+              ▲
+            </button>
+            <span className="font-semibold text-lg">{post.upvotes}</span>
+            <button
+              onClick={() => handleVote('downvote')}
+              className="text-red-500 hover:text-red-600"
+            >
+              ▼
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-2">Comments</h2>
-        <form onSubmit={handleAddComment} className="mb-4">
+
+      {/* Comments Section */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Comments</h2>
+        
+        
+        {/* Display Comments */}
+        <div className="space-y-4">
+            {comments.map((comment) => (
+            <div
+                key={comment.id}
+                className="bg-white border border-gray-200 p-4 rounded-lg shadow-sm"
+            >
+                <p className="text-gray-700">{comment.body}</p>
+                <div className="mt-2 text-sm text-gray-500">
+                By {comment.expand?.author?.username || 'Unknown'} on{' '}
+                {new Date(comment.created).toLocaleDateString()}
+                </div>
+            </div>
+            ))}
+        </div>
+
+        <form onSubmit={handleAddComment} className="my-6">
           <textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Add a comment..."
-            className="w-full p-2 border rounded"
-            rows="3"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows="4"
             required
           />
-          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2">
+          <button
+            type="submit"
+            className="mt-3 bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition"
+          >
             Add Comment
           </button>
         </form>
-        <div className="space-y-4">
-          {comments.map((comment) => (
-            <div key={comment.id} className="border p-4 rounded">
-              <p>{comment.text}</p>
-              <div className="mt-2 text-sm text-gray-500">
-                By {comment.expand?.user?.username || 'Unknown'} on {new Date(comment.created).toLocaleDateString()}
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

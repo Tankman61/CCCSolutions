@@ -10,6 +10,7 @@ import FooterWithLogo from "./components/Footer.jsx";
 import About from "./pages/AboutPage.jsx";
 import Forum from "./pages/ForumsPage.jsx";
 import PostPage from "./pages/PostPage.jsx";
+import CreatePost from "./pages/CreatePostPage.jsx";
 import Resources from "./pages/ResourcesPage.jsx";
 
 const App = () => {
@@ -25,7 +26,8 @@ const App = () => {
             <Route path="/about" element = {<About />} />
             <Route path="/resources" element = {<Resources />} />
             <Route path="/forum" element={<Forum/>} />
-            <Route path="/forum/:id" component={PostPage} />
+            <Route path="/forum/:id" element={<PostPage />} />
+            <Route path="/create-post" element={<CreatePost />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

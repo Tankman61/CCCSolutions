@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import PocketBase from 'pocketbase';
+import { useNavigate } from 'react-router-dom';
 
 const pb = new PocketBase('https://mmhs.pockethost.io');
 
-export default function AuthForm() {
+export default function AuthForm({ onLoginSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [email, setEmail] = useState('');
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const navigate = useNavigate(); // Initialize the useNavigate hook
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,19 +20,30 @@ export default function AuthForm() {
 
     try {
       if (isLogin) {
+        // Login logic
         const authData = await pb.collection('users').authWithPassword(username, password);
         console.log(authData);
         setSuccess('Login successful!');
+        onLoginSuccess(); // Notify parent component of successful login
+        navigate('/forum'); // Redirect to the forum page after login
       } else {
+        // Registration logic
         const data = {
           username,
-          email,
           password,
           passwordConfirm: password,
         };
+
+        // Create the user
         const record = await pb.collection('users').create(data);
         console.log(record);
         setSuccess('User created successfully!');
+
+        // Automatically log in the newly created user
+        const authData = await pb.collection('users').authWithPassword(username, password);
+        console.log(authData);
+        onLoginSuccess(); // Notify parent component of successful login
+        navigate('/forum'); // Redirect to the forum page after login
       }
     } catch (error) {
       setError(isLogin ? 'Login failed. Please check your credentials.' : 'Registration failed. Please try again.');
@@ -39,7 +52,7 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           {isLogin ? 'Sign in to your account' : 'Create a new account'}
@@ -65,24 +78,6 @@ export default function AuthForm() {
                 />
               </div>
             </div>
-
-            {!isLogin && (
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  Email address (optional)
-                </label>
-                <div className="mt-1">
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-              </div>
-            )}
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
