@@ -8,9 +8,8 @@ import NotFound from "./pages/NotfoundPage.jsx";
 import Navbar from "./components/Navbar.jsx";
 import FooterWithLogo from "./components/Footer.jsx";
 import About from "./pages/AboutPage.jsx";
-import ForumList from "./pages/ForumList.jsx";
-import Forum from "./pages/Forum.jsx";
-import Thread from "./pages/Thread.jsx";
+import Forum from "./pages/ForumsPage.jsx";
+import PostPage from "./pages/PostPage.jsx";
 import Resources from "./pages/ResourcesPage.jsx";
 
 const App = () => {
@@ -25,9 +24,8 @@ const App = () => {
             <Route path="/contest/:contestYear/:problemCode" element={<ProblemWrapper />} />
             <Route path="/about" element = {<About />} />
             <Route path="/resources" element = {<Resources />} />
-            <Route path="/forum" element={<ForumList/>} />
-            <Route path="/forum/:forumId" element={<ForumWrapper/>} />
-            <Route path="/thread/:forumId" element={<ThreadWrapper/>} />
+            <Route path="/forum" element={<Forum/>} />
+            <Route path="/forum/:id" component={PostPage} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
