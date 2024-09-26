@@ -60,7 +60,7 @@ const About = () => {
 
       {/* Timeline Section */}
       <div className="bg-white py-16 px-4 border-t border-gray-200">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto px-8">
           <h2 className="text-4xl font-bold text-center mb-10 text-blue-900">Our Journey</h2>
           <div className="space-y-8">
             {[{
@@ -126,7 +126,7 @@ const About = () => {
             We are grateful for the following individuals who have helped contribute solutions to
             this website:
           </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 m-8">
             {contributors.map((contributor, index) => (
               <div key={index} className="bg-gray-50 rounded-lg p-4 hover:shadow-md transition-shadow duration-300">
                 <div className="flex items-center mb-2">

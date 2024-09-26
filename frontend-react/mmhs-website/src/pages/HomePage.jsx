@@ -1,10 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import BackgroundImage from '../assets/mmhs.jpg';
-import { TeamOutlined, FileTextOutlined } from '@ant-design/icons';
+import { TeamOutlined, FileTextOutlined, GithubOutlined } from '@ant-design/icons';
+import { Helmet } from 'react-helmet';
+import BackgroundImage from '../assets/mmhs.jpg'
 
-// I just used the iconwrapper code from another project so it ain't tailwind
+// Styled components
 const IconWrapper = styled.div`
     font-size: 2rem;
     margin-right: 20px;
@@ -28,13 +29,27 @@ const FileTextIconWrapper = styled(IconWrapper)`
     background: linear-gradient(135deg, #11998E, #38EF7D);
 `;
 
+const GithubIconWrapper = styled(IconWrapper)`
+  background: linear-gradient(135deg, #333, #666);
+  transition: background 0.5s ease, transform 0.3s ease;  
+
+  &:hover {
+    background: linear-gradient(135deg, #42A5F5, #1E88E5); 
+    transform: scale(1.03); 
+    z-index: 1;  
+  }
+`;
+
+
+
+
 const Home = () => {
   const contentRef = useRef(null);
   const [count, setCount] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCount((prevCount) => (prevCount < 10000 ? prevCount + 100 : 10000));
+      setCount((prevCount) => (prevCount < 1000 ? prevCount + 10 : 1000));
     }, 20);
 
     return () => clearInterval(interval);
@@ -42,6 +57,15 @@ const Home = () => {
 
   return (
     <div className="bg-gray-100">
+      {/* Helmet for SEO */}
+      <Helmet>
+        <meta name="keywords" content="
+          CCC Solutions, University of Waterloo, Canadian Computing Competition, Competitive Programming, Problem Solving, Algorithms, Data Structures, Programming Contests, Code Challenges, Solution Discussions, Forum, Programming Tutorials, Code Snippets, User Contributions, Problem Analysis, Practice Problems, Resources, CCC Resources, Discussion Threads, Community Support, Programming Languages, C++, Python, Java, Solutions Archive, CCC Solution Repository, Canadian Computing Competition Solutions, CCC Preparation, CCC Strategies, CCC Tips and Tricks, CCC Student Resources, CCC Past Problems, CCC Contest Solutions
+        " />
+        <title>Home | CCC Solution Repository</title>
+      </Helmet>
+
+      <div className="bg-gray-100">
       {/* Hero Section */}
       <div
         className="relative bg-cover bg-center text-white min-h-screen flex flex-col justify-center items-center text-center px-4"
@@ -54,7 +78,7 @@ const Home = () => {
           Empowering students with <strong>comprehensive solutions</strong> for the Canadian Computing Competition.
         </p>
         <div className="flex space-x-4">
-          <Link to="/problems" className="bg-blue-800 text-white font-bold py-3 px-6 rounded-lg">
+          <Link to="/solutions" className="bg-blue-800 text-white font-bold py-3 px-6 rounded-lg">
             Explore Solutions
           </Link>
           <Link to="/forum" className="bg-white text-blue-900 font-bold py-3 px-6 rounded-lg">
@@ -62,56 +86,79 @@ const Home = () => {
           </Link>
         </div>
       </div>
+      </div>
 
       {/* Content Section */}
       <div ref={contentRef} className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-center mb-16">
-            Find all CCC solutions <span className="bg-blue-300 px-2 py-1 rounded"> Since 1996, Completely Free</span>
+            Find CCC solutions{' '}
+            <span className="bg-gradient-to-r from-yellow-400 to-amber-400 px-2 py-1 rounded">
+              From 1996 To Present
+            </span>
           </h2>
 
           {/* Feature Cards */}
-          <div className="grid md:grid-cols-2 gap-8 mb-20 ms-2">
+          <div className="grid md:grid-cols-3 gap-8 mb-10 m-16">
             {[
               {
                 title: 'Interactive Forum',
                 content: 'Discuss with peers through the forum to tackle challenging CCC problems and improve your skills.',
-                icon: <TeamIconWrapper><TeamOutlined /></TeamIconWrapper>,
+                icon: <TeamIconWrapper><TeamOutlined/></TeamIconWrapper>,
               },
               {
                 title: 'Comprehensive Solutions',
-                content: (
-                  <p>
-                    Access detailed explanations, test files, and multiple approaches to solve CCC problems dating back to 1996.
-                  </p>
-                ),
-                icon: <FileTextIconWrapper><FileTextOutlined /></FileTextIconWrapper>,
+                content: 'Access detailed explanations, test files, and multiple approaches to solve CCC problems dating back to 1996.',
+                icon: <FileTextIconWrapper><FileTextOutlined/></FileTextIconWrapper>,
+              },
+              {
+                title: 'Open Source',
+                content: 'Check out our GitHub repository. Contribute, suggest improvements, or learn from the codebase.',
+                icon: <a href="https://github.com/Tankman61/CCCSolutions" target="_blank" rel="noopener noreferrer">
+                  <GithubIconWrapper><GithubOutlined/></GithubIconWrapper>
+                </a>,
               },
             ].map((feature, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-lg flex items-start space-x-4">
-                {feature.icon}
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                  <p>{feature.content}</p>
+                <div key={index} className="relative group">
+                  <div
+                      className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-800 rounded-xl blur opacity-45 group-hover:opacity-90 transition duration-1000"
+                  ></div>
+                  <div
+                      className="relative bg-white/95 backdrop-blur-sm rounded-xl p-6 flex flex-col items-start space-y-4 h-full transform transition duration-300 hover:scale-102 hover:shadow-md"
+                  >
+                    {feature.icon}
+                    <div>
+                      <h3 className="text-xl font-semibold mb-2 bg-clip-text text-transparent bg-blue-800">
+                        {feature.title}
+                      </h3>
+                      <p className="text-gray-700">{feature.content}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
             ))}
           </div>
 
           {/* Statistics */}
-          <div className="bg-white p-8 rounded-lg shadow-lg mb-16">
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <p className="text-4xl font-bold text-blue-800">N/A</p>
-                <p className="text-gray-600">Forum Users</p>
-              </div>
-              <div className="text-center">
-                <p className="text-4xl font-bold text-blue-800">200+</p>
-                <p className="text-gray-600">CCC Solutions</p>
-              </div>
-              <div className="text-center">
-                <p className="text-4xl font-bold text-blue-800">23 years</p>
-                <p className="text-gray-600">Providing Solutions</p>
+          <div className="relative group mx-16">
+            <div
+                className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-800 rounded-xl blur opacity-45 group-hover:opacity-90 transition duration-1000"
+            ></div>
+            <div
+                className="relative bg-white/95 backdrop-blur-sm rounded-xl p-4 flex justify-around transform transition duration-300 hover:scale-102 hover:shadow-md"
+            >
+              <div className="grid md:grid-cols-3 gap-16">
+                <div className="text-center p-3">
+                  <p className="text-4xl font-bold text-blue-800">N/A</p>
+                  <p className="text-gray-600">Forum Users</p>
+                </div>
+                <div className="text-center p-3">
+                  <p className="text-4xl font-bold text-blue-800">200+</p>
+                  <p className="text-gray-600">CCC Solutions</p>
+                </div>
+                <div className="text-center p-3">
+                  <p className="text-4xl font-bold text-blue-800">23 years</p>
+                  <p className="text-gray-600">Providing Answers</p>
+                </div>
               </div>
             </div>
           </div>
