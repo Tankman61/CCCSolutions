@@ -69,8 +69,8 @@ const ProblemsTable = ({ problems }) => {
   };
 
   return (
-    <div className="light-mode overflow-x-auto m-8">
-      <table className="w-full text-gray-700 bg-white">
+    <div className=" overflow-x-auto m-8">
+      <table className="w-full text-gray-700">
         <thead>
           <tr className="bg-gray-100 border-b border-gray-200">
             <th className="pl-6 py-3 text-left text-md font-normal">Solution</th>

@@ -56,7 +56,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="bg-gray-100">
+    <div>
       {/* Helmet for SEO */}
       <Helmet>
         <meta name="keywords" content="
@@ -78,10 +78,10 @@ const Home = () => {
           Empowering students with <strong>comprehensive solutions</strong> for the Canadian Computing Competition.
         </p>
         <div className="flex space-x-4">
-          <Link to="/solutions" className="bg-blue-800 text-white font-bold py-3 px-6 rounded-lg">
+          <Link to="/solutions" className="bg-indigo-500 text-white font-bold py-3 px-6 rounded-lg">
             Explore Solutions
           </Link>
-          <Link to="/forum" className="bg-white text-blue-900 font-bold py-3 px-6 rounded-lg">
+          <Link to="/forum" className="bg-white text-indigo-500 font-bold py-3 px-6 rounded-lg">
             Visit Forum
           </Link>
         </div>

@@ -52,7 +52,7 @@ const About = () => {
         <div className="container mx-auto flex flex-col items-center text-center">
           <h1 className="text-5xl font-bold mb-4">About MMHS</h1>
           <p className="text-xl md:text-2xl max-w-2xl mb-5">
-            Learn more about our journey, from humble beginnings to a comprehensive platform offering CCC solutions
+            Learn more about our journey in becoming a comprehensive platform offering CCC solutions
             since 1996.
           </p>
         </div>
@@ -144,7 +144,7 @@ const About = () => {
       </div>
 
       {/* Revampers Section */}
-      <div className="bg-gray-50 py-16 px-4 border-t">
+      <div className="py-16 px-4 border-t bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-center mb-7 text-blue-900">The Revamp Team</h2>
           <div className="flex flex-wrap justify-center gap-8">

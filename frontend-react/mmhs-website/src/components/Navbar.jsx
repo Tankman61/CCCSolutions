@@ -58,7 +58,7 @@ const Navbar = () => {
 
           
           <div className="absolute h-[2px] bg-blue-500 transition-all duration-300" style={{
-            left: `${location.pathname === '/' ? '0%' : location.pathname === '/about' ? '20%' : location.pathname === '/solutions' ? '40%' : location.pathname === '/forum' ? '60%' : '80%'}`,
+            left: `${location.pathname === '/' ? '5.5%' : location.pathname === '/about' ? '23.9%' : location.pathname === '/solutions' ? '45.5%' : location.pathname === '/forum' ? '67.4%' : '90%'}`,
             width: '50px', // Set a fixed width for the active indicator
             bottom: '-5px', // Position the bar below the text
               transform: 'translateX(-50%)', // Center the indicator
