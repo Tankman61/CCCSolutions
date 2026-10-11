@@ -1,6 +1,9 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
+import { createMiddleware } from 'hono/factory';
+import { openAPIRouteHandler } from 'hono-openapi';
+import { Scalar } from '@scalar/hono-api-reference';
 import type { Bindings } from './types';
 import admin from './admin/routes';
 import forum from './forum/routes';
@@ -57,6 +60,31 @@ app.route('/admin', admin);
 app.route('/forum', forum);
 app.route('/user', user);
 app.route('/contests', r2);
+
+// The spec and docs page change on every deploy and nothing purges them, so never cache them.
+const noStore = createMiddleware(async (c, next) => {
+  await next();
+  c.res.headers.set('Cache-Control', 'no-store');
+});
+app.use('/openapi.json', noStore);
+app.use('/docs', noStore);
+
+app.get(
+  '/openapi.json',
+  openAPIRouteHandler(app, {
+    includeEmptyPaths: true,
+    exclude: ['/docs'],
+    documentation: {
+      info: { title: 'CCCSolutions API', version: '2.0.0', description: 'CCC test cases, solutions, and forum.' },
+      servers: [
+        { url: 'https://api.cccsolutions.ca', description: 'Production' },
+        { url: 'http://localhost:8787', description: 'Local (wrangler dev)' },
+      ],
+    },
+  }),
+);
+
+app.get('/docs', Scalar({ url: '/openapi.json' }));
 
 // `app` is exported by name for tests (Hono's app.request/app.fetch helpers);
 // the default export is the Worker's runtime handler (HTTP + cron).
